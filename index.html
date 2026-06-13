@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mundial 2026 — Apuesta Amistosa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== OVERLAY ADMIN LOGIN ===== -->
+<div id="adminOverlay" class="overlay hidden">
+  <div class="modal-box">
+    <h2 class="modal-title">🔐 Acceso Administrador</h2>
+    <input type="text" id="adminUser" placeholder="Usuario" class="input-field" />
+    <input type="password" id="adminPass" placeholder="Contraseña" class="input-field" />
+    <div class="modal-actions">
+      <button onclick="loginAdmin()" class="btn btn-gold">Ingresar</button>
+      <button onclick="closeAdminOverlay()" class="btn btn-ghost">Cancelar</button>
+    </div>
+    <p id="adminError" class="error-msg hidden">Usuario o contraseña incorrectos</p>
+  </div>
+</div>
+
+<!-- ===== OVERLAY GANADOR ===== -->
+<div id="ganadorOverlay" class="overlay hidden">
+  <div class="ganador-box">
+    <div class="copa-animada">🏆</div>
+    <h1 id="ganadorTitulo">¡CAMPEÓN DEL MUNDO!</h1>
+    <div id="ganadorContenido"></div>
+    <button onclick="cerrarGanador()" class="btn btn-gold mt-2">¡Celebrar!</button>
+  </div>
+  <canvas id="confettiCanvas"></canvas>
+</div>
+
+<!-- ===== SIDEBAR ===== -->
+<nav id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-wrap">
+      <span class="logo-icon">⚽</span>
+      <div>
+        <div class="logo-title">MUNDIAL</div>
+        <div class="logo-sub">2026 APUESTA</div>
+      </div>
+    </div>
+    <button id="sidebarToggle" class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+  </div>
+
+  <ul class="nav-menu">
+    <li><a href="#" class="nav-link active" onclick="showSection('dashboard')">
+      <span class="nav-icon">📊</span><span class="nav-text">Dashboard</span>
+    </a></li>
+    <li><a href="#" class="nav-link" onclick="showSection('participantes')">
+      <span class="nav-icon">👥</span><span class="nav-text">Participantes</span>
+    </a></li>
+    <li><a href="#" class="nav-link" onclick="showSection('estadisticas')">
+      <span class="nav-icon">📈</span><span class="nav-text">Estadísticas</span>
+    </a></li>
+    <li><a href="#" class="nav-link" onclick="showSection('resultado')">
+      <span class="nav-icon">🏅</span><span class="nav-text">Resultado</span>
+    </a></li>
+    <li><a href="#" class="nav-link" onclick="showSection('posiciones')">
+      <span class="nav-icon">🥇</span><span class="nav-text">Posiciones</span>
+    </a></li>
+    <li><a href="#" class="nav-link" onclick="showSection('simulador')">
+      <span class="nav-icon">🎮</span><span class="nav-text">Simulador</span>
+    </a></li>
+    <li id="adminNav" class="hidden"><a href="#" class="nav-link" onclick="showSection('admin')">
+      <span class="nav-icon">⚙️</span><span class="nav-text">Admin</span>
+    </a></li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <button id="btnAdmin" onclick="openAdminOverlay()" class="btn btn-ghost btn-sm">🔐 Admin</button>
+    <button onclick="toggleTheme()" class="btn btn-ghost btn-sm" id="themeBtn">🌙 Oscuro</button>
+  </div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-content">
+
+  <!-- HEADER MÓVIL -->
+  <header class="mobile-header">
+    <button onclick="toggleSidebar()" class="btn-icon">☰</button>
+    <span class="mobile-logo">⚽ MUNDIAL 2026</span>
+    <button onclick="toggleTheme()" class="btn-icon" id="themeBtnMobile">🌙</button>
+  </header>
+
+  <!-- COUNTDOWN BANNER -->
+  <div class="countdown-banner">
+    <span class="countdown-label">⏱ INICIO DEL MUNDIAL</span>
+    <span id="countdown" class="countdown-timer">--</span>
+  </div>
+
+  <!-- ===== SECCIÓN DASHBOARD ===== -->
+  <section id="sec-dashboard" class="section active">
+    <div class="section-header">
+      <h1 class="section-title">📊 Dashboard</h1>
+    </div>
+    <div class="cards-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="dash-total">0</div>
+        <div class="stat-label">Participantes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value" id="dash-mas">—</div>
+        <div class="stat-label">Más elegida</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📉</div>
+        <div class="stat-value" id="dash-menos">—</div>
+        <div class="stat-label">Menos elegida</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌍</div>
+        <div class="stat-value" id="dash-distintas">0</div>
+        <div class="stat-label">Selecciones distintas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value" id="dash-ultima">—</div>
+        <div class="stat-label">Última inscripción</div>
+      </div>
+    </div>
+
+    <!-- TOP 5 -->
+    <div class="panel mt-2">
+      <h2 class="panel-title">🏆 Top 5 Favoritos del Grupo</h2>
+      <div id="top5" class="top5-list"></div>
+    </div>
+
+    <!-- PROBABILIDADES -->
+    <div class="panel mt-2">
+      <h2 class="panel-title">🎯 Probabilidades de Ganar</h2>
+      <div id="probabilidades" class="prob-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== SECCIÓN PARTICIPANTES ===== -->
+  <section id="sec-participantes" class="section">
+    <div class="section-header">
+      <h1 class="section-title">👥 Participantes</h1>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="panel">
+      <h2 class="panel-title" id="formTitle">➕ Nuevo Participante</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nombre *</label>
+          <input type="text" id="pNombre" placeholder="Ej: Juan Pérez" class="input-field" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Selección N°1 (Principal)</label>
+          <select id="pSel1" class="input-field select-pais" onchange="updateSelects()">
+            <option value="">— Elige país —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Selección N°2</label>
+          <select id="pSel2" class="input-field select-pais" onchange="updateSelects()">
+            <option value="">— Elige país —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Selección N°3</label>
+          <select id="pSel3" class="input-field select-pais">
+            <option value="">— Elige país —</option>
+          </select>
+        </div>
+      </div>
+      <input type="hidden" id="editIndex" value="-1" />
+      <div class="form-actions">
+        <button onclick="guardarParticipante()" class="btn btn-gold">💾 Guardar</button>
+        <button onclick="cancelarEdicion()" class="btn btn-ghost">✖ Cancelar</button>
+      </div>
+      <p id="formError" class="error-msg hidden"></p>
+    </div>
+
+    <!-- LISTADO -->
+    <div class="panel mt-2">
+      <div class="list-header">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍 Buscar participante..." class="input-field input-sm" oninput="renderTabla()" />
+        </div>
+        <button onclick="ordenarAlfabetico()" class="btn btn-ghost btn-sm">🔤 Ordenar A-Z</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="tablaParticipantes">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Selección 1</th>
+              <th>Selección 2</th>
+              <th>Selección 3</th>
+              <th>Inscripción</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="totalLabel" class="total-label">0 participantes</span>
+        <div class="export-btns">
+          <button onclick="exportarExcel()" class="btn btn-ghost btn-sm">📊 Excel</button>
+          <button onclick="exportarCSV()" class="btn btn-ghost btn-sm">📄 CSV</button>
+          <button onclick="imprimirListado()" class="btn btn-ghost btn-sm">🖨 Imprimir</button>
+          <button onclick="exportarPDF()" class="btn btn-ghost btn-sm">📕 PDF</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECCIÓN ESTADÍSTICAS ===== -->
+  <section id="sec-estadisticas" class="section">
+    <div class="section-header">
+      <h1 class="section-title">📈 Estadísticas</h1>
+    </div>
+
+    <div class="stats-grid">
+      <div class="panel">
+        <h2 class="panel-title">⭐ Ranking — 1ª Opción</h2>
+        <div id="rankingPrimera"></div>
+      </div>
+      <div class="panel">
+        <h2 class="panel-title">🌍 Ranking — Total</h2>
+        <div id="rankingTotal"></div>
+      </div>
+    </div>
+
+    <div class="panel mt-2">
+      <h2 class="panel-title">📊 Gráfico de Barras — Selecciones más elegidas (total)</h2>
+      <div class="chart-wrap">
+        <canvas id="barChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="panel mt-2">
+      <h2 class="panel-title">🔢 Participantes por Selección</h2>
+      <div id="porSeleccion"></div>
+    </div>
+  </section>
+
+  <!-- ===== SECCIÓN RESULTADO ===== -->
+  <section id="sec-resultado" class="section">
+    <div class="section-header">
+      <h1 class="section-title">🏅 Resultado Oficial</h1>
+    </div>
+
+    <div class="panel admin-only">
+      <h2 class="panel-title">👑 Definir Campeón del Mundial</h2>
+      <p class="panel-desc">Solo visible para administrador. Selecciona la selección campeona real.</p>
+      <div class="form-row">
+        <select id="selCampeon" class="input-field">
+          <option value="">— Seleccionar campeón —</option>
+        </select>
+        <button onclick="definirCampeon(false)" class="btn btn-gold">🏆 Definir Campeón</button>
+      </div>
+      <div id="resultadoOficial" class="resultado-box mt-2"></div>
+    </div>
+
+    <div class="panel" id="panelResultadoPublico">
+      <h2 class="panel-title">🏆 Resultado del Torneo</h2>
+      <div id="resultadoPublico" class="resultado-box">
+        <p class="muted">El torneo aún no tiene un campeón definido.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECCIÓN POSICIONES ===== -->
+  <section id="sec-posiciones" class="section">
+    <div class="section-header">
+      <h1 class="section-title">🥇 Tabla de Posiciones</h1>
+    </div>
+    <div class="panel">
+      <div id="tablaPosiciones">
+        <p class="muted">Define el campeón para ver la tabla de posiciones.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECCIÓN SIMULADOR ===== -->
+  <section id="sec-simulador" class="section">
+    <div class="section-header">
+      <h1 class="section-title">🎮 Simulador</h1>
+    </div>
+    <div class="panel">
+      <h2 class="panel-title">Prueba el resultado antes de que termine el Mundial</h2>
+      <p class="panel-desc">Elige cualquier selección como campeona y ve quién ganaría.</p>
+      <div class="form-row">
+        <select id="selSimulador" class="input-field">
+          <option value="">— Seleccionar país —</option>
+        </select>
+        <button onclick="simular()" class="btn btn-gold">▶ Simular</button>
+      </div>
+      <div id="resultadoSimulacion" class="resultado-box mt-2"></div>
+    </div>
+  </section>
+
+  <!-- ===== SECCIÓN ADMIN ===== -->
+  <section id="sec-admin" class="section admin-only">
+    <div class="section-header">
+      <h1 class="section-title">⚙️ Panel Administrador</h1>
+    </div>
+    <div class="cards-grid">
+      <div class="panel">
+        <h2 class="panel-title">📤 Exportaciones</h2>
+        <div class="btn-list">
+          <button onclick="exportarExcel()" class="btn btn-gold">📊 Exportar Excel</button>
+          <button onclick="exportarCSV()" class="btn btn-gold">📄 Exportar CSV</button>
+          <button onclick="imprimirListado()" class="btn btn-gold">🖨 Imprimir</button>
+          <button onclick="exportarPDF()" class="btn btn-gold">📕 PDF</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h2 class="panel-title">⚠️ Zona Peligrosa</h2>
+        <div class="btn-list">
+          <button onclick="reiniciarTorneo()" class="btn btn-danger">🗑 Reiniciar Torneo</button>
+          <button onclick="cerrarSesionAdmin()" class="btn btn-ghost">🚪 Cerrar Sesión</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel mt-2">
+      <h2 class="panel-title">📋 Log de Actividad</h2>
+      <div id="logActividad" class="log-box"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- SheetJS para Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
