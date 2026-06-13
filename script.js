@@ -343,7 +343,7 @@ async function guardarParticipante() {
   const sel1   = document.getElementById('pSel1').value;
   const sel2   = document.getElementById('pSel2').value;
   const sel3   = document.getElementById('pSel3').value;
-  const editId = document.getElementById('editIndex').value; // UUID o vacío
+  const editId = document.getElementById('editIndex').value.trim().replace('-1',''); // UUID real o vacío
   const errEl  = document.getElementById('formError');
 
   if (!nombre)   return showError(errEl, 'El nombre es obligatorio.');
